@@ -1,27 +1,9 @@
 import Link from 'next/link';
-import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import styles from './landing.module.css';
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-space-grotesk',
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-jetbrains-mono',
-});
-
-export const metadata = {
-  title: 'POV Task Logger',
-  description: 'Every step, recorded as it happens.',
-};
 
 export default function LandingPage() {
   return (
-    <div className={`${styles.page} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+    <div className={styles.page}>
       <div className={`${styles.eyebrow} ${styles.mono}`}>
         <div className={styles.ring}></div>
         FIRST-PERSON TASK LOGGING — DEMO
