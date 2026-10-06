@@ -1,0 +1,228 @@
+.page {
+  --bg: #07080c;
+  --bg2: #0d101a;
+  --chrome-a: #eef1f6;
+  --chrome-b: #8891a3;
+  --chrome-c: #30353f;
+  --blue: #4a8dff;
+  --line: rgba(255, 255, 255, 0.08);
+  --muted: #8a90a3;
+
+  background:
+    radial-gradient(circle at 50% -10%, rgba(74, 141, 255, 0.10), transparent 55%),
+    var(--bg);
+  color: #eef0f5;
+  font-family: var(--font-space-grotesk), 'Space Grotesk', ui-sans-serif, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 64px 24px 48px;
+}
+
+.mono {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+.ring {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 10px var(--blue);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.title {
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  font-weight: 700;
+  line-height: 1.02;
+  text-align: center;
+  letter-spacing: -0.02em;
+  background: linear-gradient(170deg, var(--chrome-a) 10%, var(--chrome-b) 45%, var(--chrome-c) 55%, var(--chrome-a) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  max-width: 14ch;
+}
+
+.subtitle {
+  margin-top: 22px;
+  max-width: 46ch;
+  text-align: center;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.stage {
+  margin-top: 56px;
+  width: 100%;
+  max-width: 620px;
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, #0f1420, #080a10);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.orb {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 1.5px solid var(--blue);
+  box-shadow: 0 0 36px rgba(74, 141, 255, 0.35);
+  animation: breathe 3.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: .9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+.stageLabel {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #5b6175;
+}
+
+.recBadge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 999px;
+  padding: 5px 11px 5px 8px;
+  font-size: 11.5px;
+  color: #c6cad6;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff4a3d;
+  animation: pulse 1.4s infinite;
+}
+
+.cta {
+  margin-top: 44px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 22px;
+  border-radius: 11px;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity .15s ease;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.btnPrimary {
+  background: var(--blue);
+  color: #06070b;
+}
+
+.btnGhost {
+  border: 1px solid var(--line);
+  color: #e4e6ee;
+}
+
+.divider {
+  width: 100%;
+  max-width: 620px;
+  height: 1px;
+  background: var(--line);
+  margin: 72px 0 28px;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.zeno {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.zenoMark {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  background: linear-gradient(170deg, var(--chrome-a) 10%, var(--chrome-b) 50%, var(--chrome-c) 60%, var(--chrome-a) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.credit {
+  font-size: 12.5px;
+  color: #5b6175;
+}
+
+.credit a {
+  color: #a7b4ff;
+  text-decoration: none;
+}
+
+.credit a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .stage {
+    aspect-ratio: 4 / 5;
+  }
+}
