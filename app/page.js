@@ -32,6 +32,12 @@ export default function Home() {
   const canvasRef = useRef(null);
   const timerRef = useRef(null);
   const animFrameRef = useRef(null);
+  const recordingTimeRef = useRef(0);
+
+  // Sync recordingTimeRef with recordingTime state
+  useEffect(() => {
+    recordingTimeRef.current = recordingTime;
+  }, [recordingTime]);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -187,7 +193,7 @@ export default function Home() {
         if (nextStepIndex === -1) return prevSteps; // All steps already completed
 
         const now = new Date().toLocaleTimeString();
-        const timeStr = `REC +${formatTimer(recordingTime)} (${now})`;
+        const timeStr = `REC +${formatTimer(recordingTimeRef.current)} (${now})`;
 
         return prevSteps.map((step, idx) => {
           if (idx === nextStepIndex) {
@@ -203,7 +209,7 @@ export default function Home() {
     }, 3500);
 
     return () => clearInterval(interval);
-  }, [demoMode, demoAutoProgress, isRecording, recordingTime]);
+  }, [demoMode, demoAutoProgress, isRecording]);
 
   const toggleRecording = () => {
     setIsRecording((prev) => !prev);
