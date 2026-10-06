@@ -8,6 +8,11 @@ const PRESETS = [
   { name: 'Cleaning', steps: ['Clear surfaces', 'Wipe down', 'Vacuum/mop', 'Final check'] },
 ];
 
+function getStepImageUrl(stepText, seed) {
+  const prompt = `POV first person view, realistic photo, ${stepText}`;
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=640&height=360&nologo=true&seed=${seed}`;
+}
+
 export default function Home() {
   const [presetIndex, setPresetIndex] = useState(0);
   const [sessionName, setSessionName] = useState(PRESETS[0].name);
@@ -17,6 +22,9 @@ export default function Home() {
   const [demoMode, setDemoMode] = useState(false);
   const [demoAutoProgress, setDemoAutoProgress] = useState(false);
   const [cameraError, setCameraError] = useState(null);
+
+  const [imgLoading, setImgLoading] = useState(true);
+  const [imgError, setImgError] = useState(false);
 
   const [steps, setSteps] = useState(() =>
     PRESETS[0].steps.map((text, i) => ({
@@ -29,9 +37,7 @@ export default function Home() {
   const [newStepText, setNewStepText] = useState('');
 
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
   const timerRef = useRef(null);
-  const animFrameRef = useRef(null);
   const recordingTimeRef = useRef(0);
 
   // Sync recordingTimeRef with recordingTime state
@@ -74,6 +80,20 @@ export default function Home() {
     localStorage.setItem('pov_logger_preset_index', String(presetIndex));
   }, [presetIndex]);
 
+  // Determine active step for demo image generation
+  const activeStep = steps.find((s) => !s.completed) || steps[steps.length - 1];
+  const activeStepIndex = activeStep ? steps.indexOf(activeStep) : 0;
+  const seed = activeStep ? (presetIndex + activeStepIndex) * 17 + 42 : 42;
+  const imageUrl = activeStep ? getStepImageUrl(activeStep.text, seed) : null;
+
+  // Reset loading & error state on image URL change
+  useEffect(() => {
+    if (imageUrl) {
+      setImgLoading(true);
+      setImgError(false);
+    }
+  }, [imageUrl]);
+
   // Initialize camera access
   useEffect(() => {
     let streamInstance = null;
@@ -107,60 +127,6 @@ export default function Home() {
       }
     };
   }, []);
-
-  // Canvas animation for Demo Mode
-  useEffect(() => {
-    if (!demoMode || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let angle = 0;
-
-    const renderDemo = () => {
-      angle += 0.02;
-      ctx.fillStyle = '#090d16';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw grid pattern
-      ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 40) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Draw simulated camera crosshairs / reticle
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
-      ctx.strokeStyle = '#3b82f6';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 60 + Math.sin(angle) * 10, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '14px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('DEMO POV FEED - SIMULATED CAMERA', cx, cy + 90);
-
-      animFrameRef.current = requestAnimationFrame(renderDemo);
-    };
-
-    renderDemo();
-
-    return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-    };
-  }, [demoMode]);
 
   // Recording timer tick
   useEffect(() => {
@@ -337,7 +303,31 @@ export default function Home() {
             </div>
 
             {demoMode ? (
-              <canvas ref={canvasRef} width={640} height={360} />
+              steps.length === 0 ? (
+                <div className="demo-placeholder">Add a task to see a preview</div>
+              ) : imgError || !imageUrl ? (
+                <div className="demo-placeholder">DEMO POV FEED - SIMULATED CAMERA</div>
+              ) : (
+                <>
+                  {imgLoading && (
+                    <div className="demo-loading-overlay">
+                      <div className="spinner" />
+                      <span>Generating preview...</span>
+                    </div>
+                  )}
+                  <img
+                    src={imageUrl}
+                    alt={activeStep?.text || 'POV Step Preview'}
+                    onLoad={() => setImgLoading(false)}
+                    onError={() => {
+                      setImgLoading(false);
+                      setImgError(true);
+                    }}
+                    className="demo-img"
+                    style={{ display: imgLoading ? 'none' : 'block' }}
+                  />
+                </>
+              )
             ) : (
               <video ref={videoRef} autoPlay playsInline muted />
             )}
