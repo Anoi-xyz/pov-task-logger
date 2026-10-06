@@ -2,20 +2,30 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+const PRESETS = [
+  { name: 'Pick & Pack', steps: ['Pick item', 'Pack item', 'Scan & Label', 'Ship'] },
+  { name: 'Cooking', steps: ['Prep ingredients', 'Chop vegetables', 'Cook', 'Plate & serve'] },
+  { name: 'Cleaning', steps: ['Clear surfaces', 'Wipe down', 'Vacuum/mop', 'Final check'] },
+];
+
 export default function Home() {
-  const [sessionName, setSessionName] = useState('POV Session #1');
+  const [presetIndex, setPresetIndex] = useState(0);
+  const [sessionName, setSessionName] = useState(PRESETS[0].name);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [cameraActive, setCameraActive] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+  const [demoAutoProgress, setDemoAutoProgress] = useState(false);
   const [cameraError, setCameraError] = useState(null);
 
-  const [steps, setSteps] = useState([
-    { id: '1', text: 'Inspect equipment and workspace', completed: false, timestamp: null },
-    { id: '2', text: 'Position camera overhead / POV angle', completed: false, timestamp: null },
-    { id: '3', text: 'Execute primary task action sequence', completed: false, timestamp: null },
-    { id: '4', text: 'Verify output quality & cleanup', completed: false, timestamp: null },
-  ]);
+  const [steps, setSteps] = useState(() =>
+    PRESETS[0].steps.map((text, i) => ({
+      id: String(i + 1),
+      text,
+      completed: false,
+      timestamp: null,
+    }))
+  );
   const [newStepText, setNewStepText] = useState('');
 
   const videoRef = useRef(null);
@@ -37,6 +47,10 @@ export default function Home() {
     if (savedName) {
       setSessionName(savedName);
     }
+    const savedIndex = localStorage.getItem('pov_logger_preset_index');
+    if (savedIndex !== null) {
+      setPresetIndex(Number(savedIndex));
+    }
   }, []);
 
   // Save steps to localStorage
@@ -48,6 +62,11 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem('pov_logger_session_name', sessionName);
   }, [sessionName]);
+
+  // Save preset index to localStorage
+  useEffect(() => {
+    localStorage.setItem('pov_logger_preset_index', String(presetIndex));
+  }, [presetIndex]);
 
   // Initialize camera access
   useEffect(() => {
@@ -158,12 +177,36 @@ export default function Home() {
     return `${hrs}:${mins}:${secs}`;
   };
 
+  // Auto-progress timer for demo mode when active
+  useEffect(() => {
+    if (!demoMode || !demoAutoProgress || !isRecording) return;
+
+    const interval = setInterval(() => {
+      setSteps((prevSteps) => {
+        const nextStepIndex = prevSteps.findIndex((s) => !s.completed);
+        if (nextStepIndex === -1) return prevSteps; // All steps already completed
+
+        const now = new Date().toLocaleTimeString();
+        const timeStr = `REC +${formatTimer(recordingTime)} (${now})`;
+
+        return prevSteps.map((step, idx) => {
+          if (idx === nextStepIndex) {
+            return {
+              ...step,
+              completed: true,
+              timestamp: timeStr,
+            };
+          }
+          return step;
+        });
+      });
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [demoMode, demoAutoProgress, isRecording, recordingTime]);
+
   const toggleRecording = () => {
-    if (!isRecording) {
-      setIsRecording(true);
-    } else {
-      setIsRecording(false);
-    }
+    setIsRecording((prev) => !prev);
   };
 
   const toggleStep = (id) => {
@@ -210,6 +253,25 @@ export default function Home() {
     }
   };
 
+  const handleNextTask = () => {
+    const nextIdx = (presetIndex + 1) % PRESETS.length;
+    setPresetIndex(nextIdx);
+    setSessionName(PRESETS[nextIdx].name);
+    setSteps(
+      PRESETS[nextIdx].steps.map((text, i) => ({
+        id: String(Date.now() + i),
+        text,
+        completed: false,
+        timestamp: null,
+      }))
+    );
+  };
+
+  const handleNewSession = () => {
+    setSessionName('Custom Session');
+    setSteps([]);
+  };
+
   const exportLog = () => {
     const logData = {
       sessionName,
@@ -225,6 +287,8 @@ export default function Home() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const isAllCompleted = steps.length > 0 && steps.every((s) => s.completed);
 
   return (
     <div className="container">
@@ -252,7 +316,7 @@ export default function Home() {
               value={sessionName}
               onChange={(e) => setSessionName(e.target.value)}
               className="input"
-              placeholder="e.g. PCB Assembly Task #1"
+              placeholder="e.g. Pick & Pack"
             />
           </div>
 
@@ -292,11 +356,38 @@ export default function Home() {
             >
               {demoMode ? '📹 Switch to Camera' : '🎮 Switch to Demo Feed'}
             </button>
+
+            {demoMode && (
+              <label className="toggle-label" title="Toggle automatic step progression in demo mode">
+                <input
+                  type="checkbox"
+                  checked={demoAutoProgress}
+                  onChange={(e) => setDemoAutoProgress(e.target.checked)}
+                  className="checkbox"
+                />
+                <span>{demoAutoProgress ? '🤖 Auto-progress' : '👆 Manual tap'}</span>
+              </label>
+            )}
           </div>
         </div>
 
         <div>
           <div className="card">
+            {isAllCompleted && (
+              <div className="session-complete-banner">
+                <div className="banner-title">🎉 Session Complete!</div>
+                <p className="banner-subtitle">All tasks logged for this session.</p>
+                <div className="banner-actions">
+                  <button onClick={handleNextTask} className="btn btn-primary">
+                    ⏭️ Next Task
+                  </button>
+                  <button onClick={handleNewSession} className="btn btn-secondary">
+                    ➕ New Session
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="card-title">
               <span>Task Checklist</span>
               <span className="label">
