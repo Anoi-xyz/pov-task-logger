@@ -27,6 +27,28 @@ header {
   margin-bottom: 1.5rem;
 }
 
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.back-link {
+  font-size: 0.85rem;
+  color: #8a90a3;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+  width: fit-content;
+}
+
+.back-link:hover {
+  color: #f1f5f9;
+}
+
 h1 {
   font-size: 1.5rem;
   font-weight: 700;

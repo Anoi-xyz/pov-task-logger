@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 const PRESETS = [
   { name: 'Pick & Pack', steps: ['Pick item', 'Pack item', 'Scan & Label', 'Ship'] },
@@ -265,10 +266,15 @@ export default function Home() {
   return (
     <div className="container">
       <header>
-        <h1>
-          📷 POV Task Logger
-          <span className="badge">Demo</span>
-        </h1>
+        <div className="header-left">
+          <Link href="/" className="back-link">
+            ← Landing Page
+          </Link>
+          <h1>
+            📷 POV Task Logger
+            <span className="badge">Demo</span>
+          </h1>
+        </div>
         <div className="controls">
           <button onClick={exportLog} className="btn btn-secondary">
             📥 Export Log
